@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/announcements', (req, res) => {
   Announcement.find()
     .then((result) => res.send(result))
-    .catch((err) => console.log(err));
+    .catch((err) => console.error(err));
 });
 
 router.post('/announcement', (req, res) => {
@@ -15,7 +15,7 @@ router.post('/announcement', (req, res) => {
   new Announcement({ title, description, datetime })
     .save()
     .then(() => res.sendStatus(200))
-    .catch((err) => console.log(err));
+    .catch((err) => console.error(err));
 });
 
 router.post('/announcement/:id', (req, res) => {
@@ -29,7 +29,7 @@ router.post('/announcement/:id', (req, res) => {
       return announcement.save();
     })
     .then(() => res.sendStatus(200))
-    .catch((err) => console.log(err));
+    .catch((err) => console.error(err));
 });
 
 router.delete('/announcement/:id', (req, res) => {
@@ -38,7 +38,7 @@ router.delete('/announcement/:id', (req, res) => {
   Announcement.findById(announcementId)
     .then((announcement) => announcement.remove())
     .then(() => res.sendStatus(200))
-    .catch((err) => console.log(err));
+    .catch((err) => console.error(err));
 });
 
 export default router;
