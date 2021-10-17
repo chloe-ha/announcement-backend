@@ -1,6 +1,6 @@
 import express from 'express';
 
-import announcementController from '../controllers/announcementController';
+import announcementController from '../controllers/announcement';
 
 const router = express.Router();
 

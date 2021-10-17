@@ -41,5 +41,5 @@ export default {
   getAnnouncements,
   createAnnouncement,
   editAnnouncement,
-  deleteAnnouncement
+  deleteAnnouncement,
 };
