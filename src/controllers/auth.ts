@@ -2,7 +2,12 @@ import bcrypt from 'bcryptjs';
 
 import User from '../models/user';
 
-const isAuth = (req, res) => res.send({ isAuth: !!req.session.user });
+const isAuth = (req, res) => {
+  if (req.session.user) {
+    return res.send({ isAuth: true, user: req.session.user });
+  }
+  return res.send({ isAuth: false });
+};
 
 const login = (req, res) => {
   const { email, password } = req.body;
@@ -16,8 +21,16 @@ const login = (req, res) => {
         return bcrypt.compare(password, user.password)
           .then((doMatch) => {
             if (doMatch) {
-              req.session.user = user;
-              return req.session.save(() => res.sendStatus(200));
+              req.session.user = {
+                username: user.username,
+                email: user.email,
+                role: {
+                  roleName: user.role.roleName,
+                  write: user.role.write,
+                },
+              };
+              return req.session.save(() => res.status(200)
+                .send({ isAuth: true, user: req.session.user }));
             }
             return failAuth();
           })
