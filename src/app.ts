@@ -42,16 +42,14 @@ var corsOptions = {
   origin: CLIENT,
   credentials: true
 };
-
 app.use(cors(corsOptions));
-app.use(session({ secret: 'mysecret', resave: false, saveUninitialized: true, store, cookie: { maxAge: 60 * 60 * 1000 }}));
-
-// app.use((req, res, next) => {
-//   if (!req.session.user && req.url !== '/login' && req.url !== '/isAuth') {
-//     return res.sendStatus(401);
-//   }
-//   next();
-// });
+app.use(session({
+  secret: 'mysecret',
+  resave: false,
+  saveUninitialized: true,
+  store,
+  cookie: { maxAge: 60 * 60 * 1000 }
+}));
 
 app.use(authRoutes);
 app.use(announcementRoutes);

@@ -8,8 +8,7 @@ Run `npm start`. By default, app runs [http://localhost:8080](http://localhost:8
 Error builder\
 POST requests: send 422 when incomplete/incorrect req.body\
 Invite email: build email template\
-Protect routes\
-Filter announcements\
+Filter announcements
 
 ## Assumptions
 
