@@ -19,6 +19,8 @@
   "rules": {
     "import/extensions": "off",
     "no-console": "off",
-    "no-param-reassign": 0
+    "no-param-reassign": 0,
+    "no-underscore-dangle": "off",
+    "no-unused-vars": ["warn", { "vars": "all", "args": "none" }]
   }
 }

@@ -1,19 +1,10 @@
-import dotenv from 'dotenv';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
-import nodemailer from 'nodemailer';
-import sendgridTransport from 'nodemailer-sendgrid-transport';
 
 import Invite from '../models/invite';
 import Role from '../models/role';
 import User from '../models/user';
-
-dotenv.config();
-const SEND_GRID_API_KEY = process.env.SEND_GRID_API_KEY || '';
-
-const transporter = nodemailer.createTransport(sendgridTransport({
-  auth: { api_key: SEND_GRID_API_KEY },
-}));
+import sendEmail from '../helpers/email';
 
 const getUsers = (req, res) => User.find({ 'role.roleName': { $ne: 'Admin' } })
   .then((users) => {
@@ -35,15 +26,14 @@ const inviteUser = (req, res) => {
           return res.sendStatus(500);
         }
         const token = buff.toString('hex');
-        transporter.sendMail({
-          to: email,
-          from: 'c.ha@groupeonepoint.com',
-          subject: 'You are invited to follow the announcements!',
-          html: `
+        sendEmail(
+          email,
+          'You are invited to follow the announcements!',
+          (clientUrl) => `
             <h1>You are invited to sign up to our new app!</h1>
-            <p>Click <a href="http://localhost:3000/signup/${token}">here</a> to sign up (valid 24h)</p>
+            <p>Click <a href="${clientUrl}/signup/${token}">here</a> to sign up (valid 24h)</p>
           `,
-        });
+        );
         res.sendStatus(200);
         return Invite.deleteMany({ email }).then(() => new Invite({
           email, role, token, tokenExpiry: Date.now() + 24 * 3600000,
