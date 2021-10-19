@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -5,6 +8,8 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import session from 'express-session';
 import connectMongoDBSession from 'connect-mongodb-session';
+import helmet from 'helmet';
+import morgan from 'morgan';
 
 import Role, { RoleType } from './models/role';
 import User from './models/user';
@@ -43,13 +48,24 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
+app.use(helmet());
 app.use(session({
+  name: 'sessionId',
   secret: 'mysecret',
   resave: false,
   saveUninitialized: true,
   store,
-  cookie: { maxAge: 60 * 60 * 1000 },
+  cookie: {
+    maxAge: 60 * 60 * 1000,
+    httpOnly: true,
+  },
 }));
+
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, '..', 'access.log'),
+  { flags: 'a' },
+);
+app.use(morgan('combined', { stream: accessLogStream }));
 
 app.use(authRoutes);
 app.use(announcementRoutes);
