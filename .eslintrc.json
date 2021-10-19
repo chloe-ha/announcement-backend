@@ -18,9 +18,20 @@
   ],
   "rules": {
     "import/extensions": "off",
+    "import/prefer-default-export": "off",
     "no-console": "off",
     "no-param-reassign": 0,
+    "no-undef": "off",
     "no-underscore-dangle": "off",
     "no-unused-vars": ["warn", { "vars": "all", "args": "none" }]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/tests/**/*"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "import/no-extraneous-dependencies": "off"
+      }
+    }
+  ]
 }

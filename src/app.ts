@@ -4,7 +4,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import session from 'express-session';
-import { default as connectMongoDBSession} from 'connect-mongodb-session';
+import connectMongoDBSession from 'connect-mongodb-session';
 
 import Role, { RoleType } from './models/role';
 import User from './models/user';
@@ -28,19 +28,19 @@ declare module 'express-session' {
 dotenv.config();
 const PORT = process.env.PORT || 8080;
 const URI = process.env.MONGODB_URI || '';
-const CLIENT = process.env.CLIENT_URL || 'http://localhost:3000'
+const CLIENT = process.env.CLIENT_URL || 'http://localhost:3000';
 
 const app = express();
 const MongoDBStore = connectMongoDBSession(session);
 const store = new MongoDBStore({
   uri: URI,
-  collection: 'sessions'
+  collection: 'sessions',
 });
 
 app.use(express.json());
-var corsOptions = {
+const corsOptions = {
   origin: CLIENT,
-  credentials: true
+  credentials: true,
 };
 app.use(cors(corsOptions));
 app.use(session({
@@ -48,7 +48,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   store,
-  cookie: { maxAge: 60 * 60 * 1000 }
+  cookie: { maxAge: 60 * 60 * 1000 },
 }));
 
 app.use(authRoutes);
@@ -59,41 +59,39 @@ mongoose.connect(URI, { })
   .then(() => {
     let adminRole: RoleType;
     Role.find()
-      .then(roles => {
+      .then((roles) => {
         if (roles.length === 0) {
-          const roles = [
+          const newRoles = [
             { roleName: 'Admin', write: true },
             { roleName: 'Manager', write: false },
-            { roleName: 'Staff', write: false }
+            { roleName: 'Staff', write: false },
           ];
-          return Role.create(roles);
-        } else {
-          adminRole = roles.find(r => r.roleName === 'Admin');
-          return;
+          return Role.create(newRoles);
         }
+        adminRole = roles.find((r) => r.roleName === 'Admin');
+        return [];
       })
-      .then(roles => {
-        if (roles) {
-          adminRole = roles.find(r => r.roleName === 'Admin');
+      .then((roles) => {
+        if (roles.length) {
+          adminRole = roles.find((r) => r.roleName === 'Admin');
         }
         return User.find({ 'role.roleName': 'Admin' });
       })
-      .then(adminUser => {
+      .then((adminUser) => {
         if (!adminUser.length) {
-          return bcrypt.hash('admin', 12).then(password => {
-            return new User({
-              username: 'Admin',
-              password,
-              email: 'admin@admin.com',
-              role: adminRole
-            }).save();
-          });
+          return bcrypt.hash('admin', 12).then((password) => new User({
+            username: 'Admin',
+            password,
+            email: 'admin@admin.com',
+            role: adminRole,
+          }).save());
         }
+        return null;
       })
       .then(() => {
         console.log(`App is running on port ${PORT}`);
         app.listen(PORT);
       })
-      .catch(err => console.error(err))
+      .catch((err) => console.error(err));
   })
-  .catch(err => console.error(err));
+  .catch((err) => console.error(err));

@@ -4,26 +4,26 @@ import bcrypt from 'bcryptjs';
 import Invite from '../models/invite';
 import Role from '../models/role';
 import User from '../models/user';
-import sendEmail from '../helpers/email';
+import { sendEmail } from '../helpers/email';
+import { handleError, sendErrorMessage } from '../helpers/error';
 
-const getUsers = (req, res) => User.find({ 'role.roleName': { $ne: 'Admin' } })
+export const getUsers = (req, res) => User.find({ 'role.roleName': { $ne: 'Admin' } })
   .then((users) => {
     res.send(users);
   })
-  .catch((err) => console.error(err));
+  .catch((err) => handleError(err, res));
 
-const inviteUser = (req, res) => {
+export const inviteUser = (req, res) => {
   const { email, role } = req.body;
   return User.findOne({ email })
     .then((user) => {
       if (user) {
-        return res.status(422).send({ error: 'User already has an account' });
+        return sendErrorMessage(422, 'User already has an account', res);
       }
 
       return crypto.randomBytes(32, (err, buff) => {
         if (err) {
-          console.log(err);
-          return res.sendStatus(500);
+          return handleError(err, res);
         }
         const token = buff.toString('hex');
         sendEmail(
@@ -34,26 +34,26 @@ const inviteUser = (req, res) => {
             <p>Click <a href="${clientUrl}/signup/${token}">here</a> to sign up (valid 24h)</p>
           `,
         );
-        res.sendStatus(200);
+        res.status(200).json();
         return Invite.deleteMany({ email }).then(() => new Invite({
           email, role, token, tokenExpiry: Date.now() + 24 * 3600000,
         }).save());
       });
     })
-    .catch((err) => console.error(err));
+    .catch((err) => handleError(err, res));
 };
 
-const getTokenEmail = (req, res) => {
+export const getTokenEmail = (req, res) => {
   const { token } = req.params;
   return Invite.findOne({ token }).then((invite) => {
     if (invite && invite.tokenExpiry > new Date()) {
-      return res.status(200).send({ email: invite.email });
+      return res.status(200).json({ email: invite.email });
     }
-    return res.status(422).send({ error: 'The invitation is invalid or expired' });
+    return sendErrorMessage(422, 'The invitation is invalid or expired', res);
   });
 };
 
-const postUser = (req, res) => {
+export const postUser = (req, res) => {
   const { token } = req.params;
   const { username, password } = req.body;
 
@@ -72,11 +72,7 @@ const postUser = (req, res) => {
             .catch((err) => console.error(err)))
           .catch((err) => console.error(err));
       }
-      return res.status(422).send({ error: 'The invitation is invalid or expired' });
+      return sendErrorMessage(422, 'The invitation is invalid or expired', res);
     })
-    .catch((err) => console.error(err));
-};
-
-export default {
-  getUsers, inviteUser, getTokenEmail, postUser,
+    .catch((err) => handleError(err, res));
 };

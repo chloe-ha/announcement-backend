@@ -1,15 +1,14 @@
-const isAuth = (req, res, next) => {
+export const isAuth = (req, res, next) => {
   if (!req.session.user) {
-    return res.sendStatus(401);
+    return res.status(401).json();
   }
   return next();
 };
-const isAdmin = (req, res, next) => {
+export const isAdmin = (req, res, next) => {
   if (!req.session.user
     || (req.session.user && !req.session.user.role.write)
   ) {
-    return res.sendStatus(403);
+    return res.status(403).json();
   }
   return next();
 };
-export default { isAuth, isAdmin };

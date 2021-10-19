@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport(sendgridTransport({
   auth: { api_key: SEND_GRID_API_KEY },
 }));
 
-const sendEmail = (
+export const sendEmail = (
   to: string | string[],
   subject: string,
   htmlBuilder: (clientUrl: string) => string,
@@ -22,5 +22,3 @@ const sendEmail = (
     html: htmlBuilder(CLIENT_URL),
   });
 };
-
-export default sendEmail;
