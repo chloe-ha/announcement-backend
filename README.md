@@ -7,8 +7,8 @@ Run `npm start`. By default, app runs [http://localhost:8080](http://localhost:8
 ## TODOs
 Error builder\
 POST requests: send 422 when incomplete/incorrect req.body\
-Invite email: build email template\
 Filter announcements\
+Invite email: build email template\
 Check how to send multiple emails individually (recipients should not see other recipients email)
 
 ## Assumptions

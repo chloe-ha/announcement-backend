@@ -1,9 +1,10 @@
 import Announcement from '../models/announcement';
 import Role from '../models/role';
 import User from '../models/user';
-import sendEmail from '../helpers/email';
+import { sendEmail } from '../helpers/email';
+import { handleError, sendErrorMessage } from '../helpers/error';
 
-const getAnnouncements = (req, res) => {
+export const getAnnouncements = (req, res) => {
   const currentRole = req.session.user.role.roleName;
   return Announcement.find()
     .populate('role')
@@ -23,18 +24,18 @@ const getAnnouncements = (req, res) => {
         if (currentRole === 'Admin') return true;
         return false;
       }))
-    .then((result) => res.send(result))
-    .catch((err) => console.error(err));
+    .then((result) => res.status(200).json(result))
+    .catch((err) => handleError(err, res));
 };
 
-const createAnnouncement = (req, res) => {
+export const createAnnouncement = (req, res) => {
   const {
     title, description, datetime, roleName,
   } = req.body;
   return Role.find({ roleName })
     .then((role) => {
       if (!role.length) {
-        return res.status(422).send({ error: 'Role not found' });
+        return sendErrorMessage(422, 'Role not found', res);
       }
       return new Announcement({
         title, description, datetime, role: role[0]._id,
@@ -55,13 +56,13 @@ const createAnnouncement = (req, res) => {
               <p>Go check out the latest news <a href="${clientUrl}">now</a></p>
             `,
           );
-          return res.sendStatus(200);
+          return res.status(200).json();
         });
     })
-    .catch((err) => console.error(err));
+    .catch((err) => handleError(err, res));
 };
 
-const editAnnouncement = (req, res) => {
+export const editAnnouncement = (req, res) => {
   const announcementId = req.params.id;
   const {
     title, description, datetime, roleName,
@@ -69,7 +70,7 @@ const editAnnouncement = (req, res) => {
   return Role.find({ roleName })
     .then((role) => {
       if (!role.length) {
-        return res.sendStatus(500);
+        return sendErrorMessage(422, 'Role not found', res);
       }
       return Announcement.findById(announcementId)
         .then((announcement) => {
@@ -79,23 +80,16 @@ const editAnnouncement = (req, res) => {
           announcement.role = role[0]._id;
           return announcement.save();
         })
-        .then(() => res.sendStatus(200));
+        .then(() => res.status(200).json());
     })
-    .catch((err) => console.error(err));
+    .catch((err) => handleError(err, res));
 };
 
-const deleteAnnouncement = (req, res) => {
+export const deleteAnnouncement = (req, res) => {
   const announcementId = req.params.id;
 
   Announcement.findById(announcementId)
     .then((announcement) => announcement.remove())
-    .then(() => res.sendStatus(200))
-    .catch((err) => console.error(err));
-};
-
-export default {
-  getAnnouncements,
-  createAnnouncement,
-  editAnnouncement,
-  deleteAnnouncement,
+    .then(() => res.status(200).json())
+    .catch((err) => handleError(err, res));
 };

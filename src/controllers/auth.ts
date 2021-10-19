@@ -1,19 +1,18 @@
 import bcrypt from 'bcryptjs';
 
 import User from '../models/user';
+import { handleError, sendErrorMessage } from '../helpers/error';
 
-const isAuth = (req, res) => {
+export const isAuth = (req, res) => {
   if (req.session.user) {
-    return res.send({ isAuth: true, user: req.session.user });
+    return res.status(200).json({ isAuth: true, user: req.session.user });
   }
-  return res.send({ isAuth: false });
+  return res.status(401).json();
 };
 
-const login = (req, res) => {
+export const login = (req, res) => {
   const { email, password } = req.body;
-  const failAuth = () => res
-    .status(403)
-    .send({ error: 'Invalid email or password' });
+  const failAuth = () => sendErrorMessage(403, 'Invalid email or password', res);
 
   return User.findOne({ email })
     .then((user) => {
@@ -30,23 +29,20 @@ const login = (req, res) => {
                 },
               };
               return req.session.save(() => res.status(200)
-                .send({ isAuth: true, user: req.session.user }));
+                .json({ isAuth: true, user: req.session.user }));
             }
             return failAuth();
           })
-          .catch((err) => console.error(err));
+          .catch((err) => handleError(err, res));
       }
       return failAuth();
     })
-    .catch((err) => console.error(err));
+    .catch((err) => handleError(err, res));
 };
 
-const logout = (req, res) => req.session.destroy((err) => {
+export const logout = (req, res) => req.session.destroy((err) => {
   if (err) {
-    console.error(err);
-    return res.sendStatus(500);
+    return handleError(err, res);
   }
-  return res.sendStatus(200);
+  return res.status(200).json();
 });
-
-export default { isAuth, login, logout };

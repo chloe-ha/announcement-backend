@@ -1,19 +1,15 @@
 import express from 'express';
 
-import accessControl from '../middleware/access-control';
-import userController from '../controllers/user';
+import { isAuth, isAdmin } from '../middleware/access-control';
+import {
+  getUsers, inviteUser, getTokenEmail, postUser,
+} from '../controllers/user';
 
 const router = express.Router();
 
-router.get('/users',
-  accessControl.isAuth,
-  accessControl.isAdmin,
-  userController.getUsers);
-router.post('/invite-user',
-  accessControl.isAuth,
-  accessControl.isAdmin,
-  userController.inviteUser);
-router.get('/token-email/:token', userController.getTokenEmail);
-router.post('/user/:token', userController.postUser);
+router.get('/users', isAuth, isAdmin, getUsers);
+router.post('/invite-user', isAuth, isAdmin, inviteUser);
+router.get('/token-email/:token', getTokenEmail);
+router.post('/user/:token', postUser);
 
 export default router;
