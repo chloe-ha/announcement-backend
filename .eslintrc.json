@@ -29,6 +29,7 @@
     {
       "files": ["src/tests/**/*"],
       "rules": {
+        "@typescript-eslint/no-empty-function": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "import/no-extraneous-dependencies": "off"
       }
