@@ -67,7 +67,7 @@ export const postUser = (req, res) => {
               username, email, password: encryptedPassword, role: currentRole[0],
             }).save()
               .then(() => invite.remove())
-              .then(() => res.sendStatus(200))
+              .then(() => res.status(200).json())
               .catch((err) => console.error(err)))
             .catch((err) => console.error(err)))
           .catch((err) => console.error(err));

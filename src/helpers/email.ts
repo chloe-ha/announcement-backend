@@ -15,6 +15,9 @@ export const sendEmail = (
   subject: string,
   htmlBuilder: (clientUrl: string) => string,
 ) => {
+  if (!to || (Array.isArray(to) && !to.length)) {
+    return;
+  }
   transporter.sendMail({
     to,
     from: 'c.ha@groupeonepoint.com',
